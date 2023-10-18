@@ -1,0 +1,215 @@
+-- MySQL Workbench Forward Engineering
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+
+-- -----------------------------------------------------
+-- Schema sosecurity
+-- -----------------------------------------------------
+
+-- -----------------------------------------------------
+-- Schema sosecurity
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `sosecurity` DEFAULT CHARACTER SET utf8 ;
+USE `sosecurity` ;
+
+-- -----------------------------------------------------
+-- Table `sosecurity`.`tipo_usuario`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `sosecurity`.`tipo_usuario` (
+  `Id_tipo_usuario` INT(11) NOT NULL AUTO_INCREMENT,
+  `descripcion` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`Id_tipo_usuario`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+
+-- -----------------------------------------------------
+-- Table `sosecurity`.`autenticacion`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `sosecurity`.`autenticacion` (
+  `Id_autenticacion` INT(11) NOT NULL AUTO_INCREMENT,
+  `tipo_autenticacion` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`Id_autenticacion`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+
+-- -----------------------------------------------------
+-- Table `sosecurity`.`usuario`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `sosecurity`.`usuario` (
+  `Id_usuario` INT(11) NOT NULL AUTO_INCREMENT,
+  `correo` VARCHAR(45) NOT NULL,
+  `contraseña` VARCHAR(45) NOT NULL,
+  `fk_tipo_usuario` INT(11) NOT NULL,
+  `fk_autenticacion` INT(11) NOT NULL,
+  PRIMARY KEY (`Id_usuario`),
+  INDEX `fk_Usuario_Tipo_usuario_idx` (`fk_tipo_usuario` ASC),
+  INDEX `fk_usuario_autenticacion1_idx` (`fk_autenticacion` ASC),
+  CONSTRAINT `fk_Usuario_Tipo_usuario`
+    FOREIGN KEY (`fk_tipo_usuario`)
+    REFERENCES `sosecurity`.`tipo_usuario` (`Id_tipo_usuario`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_usuario_autenticacion1`
+    FOREIGN KEY (`fk_autenticacion`)
+    REFERENCES `sosecurity`.`autenticacion` (`Id_autenticacion`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+
+-- -----------------------------------------------------
+-- Table `sosecurity`.`datos_medicos`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `sosecurity`.`datos_medicos` (
+  `Id_datos_medicos` INT(11) NOT NULL AUTO_INCREMENT,
+  `grupo_sanguineo` ENUM('A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O') NOT NULL,
+  `alergias` VARCHAR(45) NOT NULL,
+  `otros` TEXT NOT NULL,
+  `fk_Id_usuario` INT(11) NOT NULL,
+  PRIMARY KEY (`Id_datos_medicos`),
+  INDEX `fk_Datos_medicos_Usuario1_idx` (`fk_Id_usuario` ASC),
+  CONSTRAINT `fk_Datos_medicos_Usuario1`
+    FOREIGN KEY (`fk_Id_usuario`)
+    REFERENCES `sosecurity`.`usuario` (`Id_usuario`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+
+-- -----------------------------------------------------
+-- Table `sosecurity`.`alergias`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `sosecurity`.`alergias` (
+  `Id_alergias` INT(11) NOT NULL AUTO_INCREMENT,
+  `Tipo de alergia` VARCHAR(45) NOT NULL,
+  ` medicamento` VARCHAR(45) NOT NULL,
+  `observacion` VARCHAR(300) NOT NULL,
+  `fk_Id_datos_medicos` INT(11) NOT NULL,
+  PRIMARY KEY (`Id_alergias`),
+  INDEX `fk_Alergias_Datos_medicos1_idx` (`fk_Id_datos_medicos` ASC),
+  CONSTRAINT `fk_Alergias_Datos_medicos1`
+    FOREIGN KEY (`fk_Id_datos_medicos`)
+    REFERENCES `sosecurity`.`datos_medicos` (`Id_datos_medicos`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+
+-- -----------------------------------------------------
+-- Table `sosecurity`.`alertas`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `sosecurity`.`alertas` (
+  `Id_alertas` INT(11) NOT NULL AUTO_INCREMENT,
+  `usuario_latitud` DECIMAL(10,0) NOT NULL,
+  `usuario_longuitud` DECIMAL(10,0) NOT NULL,
+  `sanitaria_latitud` DECIMAL(10,0) NOT NULL,
+  `saniataria_longuitud` DECIMAL(10,0) NOT NULL,
+  `aceptada` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `fk_Id_Usuario` INT(11) NOT NULL,
+  PRIMARY KEY (`Id_alertas`),
+  INDEX `fk_Alertas_Usuario1_idx` (`fk_Id_Usuario` ASC),
+  CONSTRAINT `fk_Alertas_Usuario1`
+    FOREIGN KEY (`fk_Id_Usuario`)
+    REFERENCES `sosecurity`.`usuario` (`Id_usuario`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+
+-- -----------------------------------------------------
+-- Table `sosecurity`.`contactos_emergencia`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `sosecurity`.`contactos_emergencia` (
+  `Id_contactos_emergencia` INT(11) NOT NULL AUTO_INCREMENT,
+  `nombre` VARCHAR(45) NOT NULL,
+  `apellidos` VARCHAR(45) NOT NULL,
+  `parentezco` VARCHAR(45) NOT NULL,
+  `telefono` VARCHAR(45) NOT NULL,
+  `fk_Id_usuario` INT(11) NOT NULL,
+  PRIMARY KEY (`Id_contactos_emergencia`),
+  INDEX `fk_Contactos_emergencia_Usuario1_idx` (`fk_Id_usuario` ASC),
+  CONSTRAINT `fk_Contactos_emergencia_Usuario1`
+    FOREIGN KEY (`fk_Id_usuario`)
+    REFERENCES `sosecurity`.`usuario` (`Id_usuario`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+
+-- -----------------------------------------------------
+-- Table `sosecurity`.`datos_usuarios`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `sosecurity`.`datos_usuarios` (
+  `Id_datos_usuarios` INT(11) NOT NULL AUTO_INCREMENT,
+  `nombre` VARCHAR(45) NOT NULL,
+  `apellidos` VARCHAR(45) NOT NULL,
+  `tipo_identificacion` ENUM('CC', 'C.EXTRANJERIA', 'PASAPORTE', 'TARJETA IDENTIDAD') NOT NULL,
+  `telefono` VARCHAR(45) NOT NULL,
+  `fecha_nacimiento` DATE NOT NULL,
+  `sexo` ENUM('Masculino', 'Femenino', 'Otro') NOT NULL,
+  `fk_Id_usuario` INT(11) NOT NULL,
+  PRIMARY KEY (`Id_datos_usuarios`),
+  INDEX `fk_Datos_usuarios_Usuario1_idx` (`fk_Id_usuario` ASC),
+  CONSTRAINT `fk_Datos_usuarios_Usuario1`
+    FOREIGN KEY (`fk_Id_usuario`)
+    REFERENCES `sosecurity`.`usuario` (`Id_usuario`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+
+-- -----------------------------------------------------
+-- Table `sosecurity`.`historial`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `sosecurity`.`historial` (
+  `Id_historial` INT(11) NOT NULL AUTO_INCREMENT,
+  `ingreso` DATETIME NOT NULL,
+  `recu_contraseña` VARCHAR(45) NOT NULL,
+  `recu_correo` VARCHAR(45) NOT NULL,
+  `fk_Id_usuario` INT(11) NOT NULL,
+  PRIMARY KEY (`Id_historial`),
+  INDEX `fk_historial_usuario1_idx` (`fk_Id_usuario` ASC),
+  CONSTRAINT `fk_historial_usuario1`
+    FOREIGN KEY (`fk_Id_usuario`)
+    REFERENCES `sosecurity`.`usuario` (`Id_usuario`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+
+-- -----------------------------------------------------
+-- Table `sosecurity`.`notificaciones_preferencia`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `sosecurity`.`notificaciones_preferencia` (
+  `Id_notificaciones_preferencia` INT(11) NOT NULL AUTO_INCREMENT,
+  `token` VARCHAR(45) NOT NULL,
+  `latitud` DECIMAL(10,0) NOT NULL,
+  `longitud` DECIMAL(10,0) NOT NULL,
+  `ultima_localizacion` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  `radio` INT(11) NOT NULL,
+  `fk_Id_Usuario` INT(11) NOT NULL,
+  PRIMARY KEY (`Id_notificaciones_preferencia`),
+  INDEX `fk_Notificaciones_preferencia_Usuario1_idx` (`fk_Id_Usuario` ASC),
+  CONSTRAINT `fk_Notificaciones_preferencia_Usuario1`
+    FOREIGN KEY (`fk_Id_Usuario`)
+    REFERENCES `sosecurity`.`usuario` (`Id_usuario`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
